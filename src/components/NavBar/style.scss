@@ -1,0 +1,43 @@
+.navbar {
+  position: fixed;
+  min-height: 50px;
+  width: 100%;
+  background-color: #000;
+}
+
+.navbar > .navbar-header {
+  display: inline;
+}
+
+.navbar > .navbar-header > .navbar-title {
+  display: inline-block;
+  font-size: 22px;
+  color: #fff;
+  padding: 10px 10px 10px 10px;
+}
+
+.navbar > .navbar-search {
+  float: right;
+  font-size: 18px;
+  background-color: #FFF;
+}
+
+.search-box {
+  height: 46px;
+  margin-top: 2px;
+  padding-bottom: 2px;
+  border: none;
+  background-color: none;
+}
+
+.search-button {
+  height: 46px;
+  margin-top: 2px;
+  padding-bottom: 2px;
+  background-color: #FFF;
+  border: none;
+  cursor: pointer;
+}
+
+
+

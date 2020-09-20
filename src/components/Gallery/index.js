@@ -17,12 +17,21 @@ class Gallery extends HTMLElement {
     shadowRoot.appendChild(styleEl);
 
     this.shadowDom = shadowRoot;
-    this.galleryDom = this.shadowDom.querySelector(".gallery");
-    this.currentPage = 0;
+    this.galleryDom = this.shadowDom.querySelector(".gallery-container");
+    this.loaderDom = this.shadowDom.querySelector(".loader-container");
+    this.currentPage = 1;
     this.searchText = "";
 
     // start flickr service
-    this.flickrService = new FlickrService("a31291fbb92c2078dc081e40fa6ab76c");
+    this.flickrService = new FlickrService("b677ef7079db7d97229cca2d509a76a5");
+
+    // listen for events that dispatch the search function
+    const navbar = document.querySelector('flickr-navbar')
+    if (navbar) {
+      navbar.addEventListener('search',  (e)  => {
+        this.searchPictures(e.detail);
+      }, false);
+    }
   }
 
   async loadPictures(search="", page = 0, reset=false) {
@@ -30,54 +39,69 @@ class Gallery extends HTMLElement {
       this.galleryDom.innerHTML="";
     }
 
-    const pictures = await this.flickrService.search(search, page);
-    const rowEl = document.createElement("div");
-    rowEl.classList = ["row"];
 
-    let colEl = document.createElement("div");
-    colEl.classList = ["col"];
-    console.log(Math.round(pictures.length / 3));
-    pictures.map((p, k) => {
-      // append prev column & create new one
-      if (k > 0 && k % Math.round(pictures.length / 3) === 0) {
-        rowEl.appendChild(colEl);
-        colEl = colEl.cloneNode(false);
+    let loader = document.createElement("div");
+    loader.classList = ["loader"];
+    this.loaderDom.prepend(loader);
+    let loaderText = this.loaderDom.querySelector(".loader-text");
+
+    let promise;
+    try {
+      promise = await this.flickrService.search(search, page);
+    } catch (e) {
+      loaderText.innerHTML=`Ops! Error occurred: ${e}`;
+      return;
+    }
+
+    setTimeout(() => {
+      if (promise) {
+        loaderText.innerHTML="The service seems unresponse. Please, try again later"
       }
+    }, 5000);
+
+    const pictures = await promise;
+    promise = null;
+
+    if (!pictures) {
+      loaderText.innerHTML=`No pictures found!`;
+      return;
+    }
+
+    // clean loader and text
+    this.loaderDom.removeChild(loader);
+    this.loaderDom.querySelector(".loader-text").innerHTML=""
+
+    pictures.map((p, k) => {
+      if (!p)
+        return;
+
+      let imgHolder = document.createElement("div");
+      imgHolder.classList = ["img-holder"];
 
       const imgEl = document.createElement("img");
       imgEl.src = p.link;
 
-      colEl.appendChild(imgEl);
+      imgHolder.appendChild(imgEl);
+      this.galleryDom.appendChild(imgHolder);
     });
+  }
 
-    this.galleryDom.appendChild(rowEl);
+  async searchPictures(search) {
+    this.currentPage=1;
+    this.searchText=search;
+    this.loadPictures(this.searchText, this.currentPage, true);
   }
 
   galleryHandler() {
     this.loadPictures(this.searchText, this.currentPage);
     // Detect when scrolled to bottom.
-    const galleryDom = this.galleryDom;
     document.addEventListener("scroll", () => {
-      if (
-         document.body.scrollTop +  document.body.clientHeight >=
-        galleryDom.scrollHeight
-      ) {
+      let scrollHeight = document.body.clientHeight;
+      let scrollPos = document.documentElement.clientHeight + document.documentElement.scrollTop;
+
+      if ((scrollHeight - scrollPos) / scrollHeight == 0) {
         this.currentPage++;
         this.loadPictures(this.searchText, this.currentPage);
-      }
-    });
-
-    // Search on enter press
-    var input = this.shadowDom.querySelector(".search-box");
-
-    // Execute a function when the user releases a key on the keyboard
-    input.addEventListener("keyup", (event) => {
-      if (event.code === "Enter") {
-        // Cancel the default action, if needed
-        event.preventDefault();
-        console.log(`Searching for ${input.value}`);
-        this.searchText = input.value;
-        this.loadPictures(this.searchText, this.currentPage, true)
       }
     });
   }

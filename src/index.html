@@ -9,18 +9,25 @@
   <meta name="description" content="Flickr API Demo">
   <meta name="author" content="Giuseppe Ronca">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://unpkg.com/@webcomponents/webcomponentsjs@^2/webcomponents-bundle.js"></script>
+  <style>
+    body {
+      margin: 0;
+      min-width: 308px;
+    }
+  </style>
 </head>
 
 <body>
-  <div>
+  <div id="main">
     <noscript>
       This app doesn't work without javascript
     </noscript>
-    <h1>Flickr API Demo</h1>
-
-    <flickr-gallery></flickr-gallery>
+    <flickr-navbar></flickr-navbar>
+    <div class="gallery" style="padding-top: 50px;">
+      <flickr-gallery />
+    </div>
   </div>
 </body>
 

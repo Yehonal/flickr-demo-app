@@ -7,72 +7,121 @@
 export default class FlickrService {
   /**
    * Creates an instance of Gallery.
-   * @param {String} _apiKey
+   * @param {string}  apiKey
+   * @param {*}       [options]
+   * @param {boolean} [options.withCache=true]
+   *
    * @memberof Gallery
    */
-  constructor (apiKey) {
-    this.apiKey = `&api_key=${apiKey}`
-    this.format = '&format=json&nojsoncallback=1'
-    this.photos = 0
-    this.search()
+  constructor(apiKey, { withCache = true } = {}) {
+    this.apiKey = `&api_key=${apiKey}`;
+    this.format = "&format=json&nojsoncallback=1";
+    this.photos = 0;
+
+    if (withCache && "caches" in window) {
+      // The Cache API is supported
+      this.cacheName = "flickrService";
+      this.cache = caches.open(this.cacheName);
+      this.withCache = true;
+    }
+
+    this.search();
   }
 
   /**
-   * @param {API Methods} _method
-   * @param {any parameters from the API} _params
+   * @param {API Methods} method
+   * @param {any parameters from the API} params
    * @return data from the call
    */
-  async apiRequest (method, ...params) {
-    const apiParams = params.join('')
+  async apiRequest(method, ...params) {
+    const apiParams = params.join("");
 
-    const flickrApi = await fetch(`
-        https://api.flickr.com/services/rest/?method=${method}${this.apiKey}${apiParams}${this.format}`)
-    const data = await flickrApi.json()
-
-    if (data.stat === 'fail') {
-      throw new Error('Ops, something went wrong')
-    } else {
-      return data
+    const url = `https://api.flickr.com/services/rest/?method=${method}${this.apiKey}${apiParams}${this.format}`;
+  
+    let response;
+    if (this.withCache) {
+      let cache = await this.cache;
+      // If we have cached data
+      response = await cache.match(url);
+      if (response)
+        return await this.processResponse(response);
+      // otherwise fetch and cache
+      response = await fetch(url);
+      await cache.put(url, response.clone());
+      return await this.processResponse(response);
     }
+
+    response = await fetch(url); 
+    return await this.processResponse(response);
   }
 
   /**
    * 
-   * @param {*} searchInput 
-   * @param {*} page 
-   * 
-   * @returns 
+   * @param {Response} response
+   * @return {object} - retrieved json object
    */
-  async search (searchInput = '', page = 0) {
+  async processResponse(response) {
+    let data = response.json();
+    if (data.stat === "fail") {
+      if (this.withCache) {
+        cache = await this.cache;
+        cache.delete(url);
+      }
+
+      throw new Error("Ops, something went wrong");
+    }
+
+    return data;
+  }
+
+  /**
+   *
+   * @param {*} searchInput
+   * @param {*} page
+   *
+   * @returns
+   */
+  async search(searchInput = "", page = 0) {
     // params reference
     // https://www.flickr.com/services/api/flickr.photos.search.html
     const res = await this.apiRequest(
-      `flickr.photos.${searchInput? 'search' : 'getRecent'}`,
-      searchInput && `&text=${searchInput}` || undefined,
-      '&per_page=25',
+      `flickr.photos.${searchInput ? "search" : "getRecent"}`,
+      (searchInput && `&text=${searchInput}`) || undefined,
+      "&per_page=25",
+      "&safe_search=3",
       `&page=${page}`
-    )
+    );
 
-    const photos = res.photos.photo
+    if (!res.photos) {
+      return null;
+    }
+
+    const photos = res.photos.photo;
     if (photos.length === 0) {
-      return null
+      return null;
     }
 
     return Promise.all(
       photos.map(async (p) => {
-        this.photos++
-        const pictures = await this.apiRequest(
-          'flickr.photos.getSizes',
+        this.photos++;
+        let pictures;
+        pictures = await this.apiRequest(
+          "flickr.photos.getSizes",
           `&photo_id=${p.id}`
-        )
-        const quality = pictures.sizes.size.length - 1 // grab original size
-        const maxSize = pictures.sizes.size[quality].width
+        );
+
+        if (!pictures.sizes) {
+          return null;
+        }
+
+        const quality = Math.round(pictures.sizes.size.length / 2); // grab medium quality
+        const maxSize = pictures.sizes.size[quality].width;
 
         return {
           link: pictures.sizes.size[quality].source,
-          size: maxSize
-        }
+          size: maxSize,
+        };
       })
-    )
+    );
   }
 }
