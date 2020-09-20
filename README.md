@@ -7,7 +7,8 @@ Features:
 * **Webcomponents and ShadowDOM:** Both the NavBar and the Gallery are separated webcomponents, thanks to the "closed" ShadowDOM they are 
   isolated by rest of the DOM.
 * **Navbar with Search box:** The search box component dispatches an event caugth by the gallery to run the search action. 
-  If you are lazy, press the Enter button to run a search. 
+  If you are lazy, press the Enter button to run a search.
+* **Loader animation:** A circular loader will be shown during the image loading, if the loading takes longer than 5 seconds or the API doesn't work, a message will be shown. 
 * **CacheAPI:** Integrated with the FlickrService.js, allows to cache the response of all fetch calls
 * **Responsive:** the gallery uses flexbox rules to resamble the Flickr website and be fully responsive
 * **Endless scroll:** you can scroll endlessy the page to load new pictures
