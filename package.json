@@ -46,6 +46,8 @@
   "jest": {
     "verbose": true,
     "coverageDirectory": "docs/coverage",
-    "setupFilesAfterEnv": ["./src/setupTests.js"]
+    "setupFilesAfterEnv": [
+      "./src/setupTests.js"
+    ]
   }
 }

@@ -11,7 +11,7 @@ Features:
 * **CacheAPI:** Integrated with the FlickrService.js, allows to cache the response of all fetch calls
 * **Responsive:** the gallery uses flexbox rules to resamble the Flickr website and be fully responsive
 * **Endless scroll:** you can scroll endlessy the page to load new pictures
-* **Tested and linted:** eslint + jest + coverage
+* **Tested and linted:** eslint + jest + coverage (`npm run serve:coverage` to read the coverage report)
 * **Optimized built:** webpack4 has been optimized to build a super-minified bundle
 
 
