@@ -93,7 +93,7 @@ class Gallery extends HTMLElement {
   galleryHandler () {
     this.loadPictures(this.searchText, this.currentPage)
     // Detect when scrolled to bottom.
-    document.addEventListener('scroll', () => {
+    document.addEventListener('scroll', async () => {
       const scrollHeight = document.body.clientHeight
       const scrollPos = document.documentElement.clientHeight + document.documentElement.scrollTop
       const scrollRatio  = (scrollHeight - scrollPos) / scrollHeight;
@@ -101,7 +101,7 @@ class Gallery extends HTMLElement {
       // less then 5%
       if (scrollRatio * 100 < 5) {
         this.currentPage++
-        this.loadPictures(this.searchText, this.currentPage)
+        await this.loadPictures(this.searchText, this.currentPage)
       }
     })
   }
