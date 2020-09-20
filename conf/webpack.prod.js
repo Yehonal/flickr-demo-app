@@ -7,5 +7,8 @@ module.exports = {
   output: {
     path: path.join(rootPath, 'dist'),
     filename: 'bundle.js'
+  },
+  optimization: {
+    minimize: true
   }
 }
