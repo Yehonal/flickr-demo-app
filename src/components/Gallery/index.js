@@ -96,7 +96,7 @@ class Gallery extends HTMLElement {
     document.addEventListener('scroll', async () => {
       const scrollHeight = document.body.clientHeight
       const scrollPos = document.documentElement.clientHeight + document.documentElement.scrollTop
-      const scrollRatio  = (scrollHeight - scrollPos) / scrollHeight;
+      const scrollRatio = (scrollHeight - scrollPos) / scrollHeight
 
       // less then 5%
       if (scrollRatio * 100 < 5) {
