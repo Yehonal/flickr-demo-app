@@ -33,6 +33,12 @@ class Navbar extends HTMLElement {
       }
     })
 
+    searchBox.addEventListener('search', (event) => {
+      this.dispatchEvent(new CustomEvent('search', {
+        detail: searchBox.value
+      }))
+    })
+
     // Search on enter press
     var searchBtn = this.shadowDom.querySelector('.search-button')
 
@@ -42,6 +48,12 @@ class Navbar extends HTMLElement {
         detail: searchBox.value
       }))
     })
+  }
+
+  onSearch (e) {
+    this.dispatchEvent(new CustomEvent('search', {
+      detail: e.target.value
+    }))
   }
 }
 
